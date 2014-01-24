@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="debug" name="Log4J2Test" packages="org.apache.logging.log4j.test">
+	<Properties><!-- specify the JVM argument -Dfeed.location=/tmp/whatever -->
+		<Property name="feed.log.file">${sys:feed.location}/$${map:src}/log/$${map:feed}</Property>
+		<Property name="feed.log.file.name">${feed.log.file}.log</Property>
+		<Property name="feed.log.file.pattern">${feed.log.file}.%i.log.gz</Property>
+	</Properties>
+	<!-- <ThresholdFilter level="debug" />  -->
+
+	<Appenders>
+		<Console name="STDOUT">
+			<PatternLayout pattern="%m%n" />
+		</Console>
+		<Routing name="RoutingFeedAppender">
+			<Routes pattern="$${map:src}-$${map:feed}">
+				<Route>
+					<RollingFile name="Rolling-${map:src}-${map:feed}"
+						fileName="${feed.log.file.name}" filePattern="${feed.log.file.pattern}" >
+						<PatternLayout>
+							<pattern>%d %p %c{1.} [%t] %m%n</pattern>
+						</PatternLayout>
+						<SizeBasedTriggeringPolicy size="500 MB" />
+						<DefaultRolloverStrategy max="20"/>
+					</RollingFile>
+				</Route>
+			</Routes>
+		</Routing>
+		<!-- 
+		<Async name="AsyncRoutingFeedAppender">
+			<AppenderRef ref="RoutingFeedAppender"/>
+		</Async>
+		 -->
+	</Appenders>
+
+	<Loggers>
+		<Logger name="FeedLogger" level="ALL" additivity="false">
+			<AppenderRef ref="RoutingFeedAppender" />
+		</Logger>
+
+		<Root level="ALL">
+			<AppenderRef ref="STDOUT" />
+		</Root>
+	</Loggers>
+
+</Configuration>
